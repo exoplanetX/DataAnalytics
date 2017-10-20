@@ -1,3 +1,7 @@
+#课前提示：  
+下周实验课内容主题为非参数分析，推荐预先加载的包有：dplyr、moments,课上部分函数需要调用这两个包。  
+另外，课堂案例数据集cholesterol来源于multcomp包，可以自行预先加载或提取出数据转存。
+
 # DataAnalytics
 #This is for a university lecture project.  
 #《数据分析与处理技术》的课件放在这里供大家使用，以实验开头的是R语言上机操作课件，附录1、2、3中收集和整理了一些用到的数据、包和其他命令。  
