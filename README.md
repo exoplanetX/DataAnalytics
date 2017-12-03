@@ -1,3 +1,6 @@
+## 课前提示：
+
+12.4-12.13课程内容为*预测*，可以参考《统计学》关于线性回归和时间序列相关内容，推荐参考资料[http://otexts.org/fpp2/](http://otexts.org/fpp2/)，R包fpp2为该教材案例数据。实验课可能用到的package包括：forecast,ggplot2.
 ## 作业提示：
 
 
