@@ -1,5 +1,9 @@
 # Data Analytics and Technology
 《数据分析与处理技术》 2016级每周课程结束后课件发布在这里，请自行下载阅读，附件中是一些专题总结。另外，2015级课件转移到单独文件夹中，供各位参考自学。 
+
+## 2018.10.11日课程提示 
+上课前20分钟答疑。请带上数据集Titanic，熟悉一下R自带数据集mtcars，安装工具包psych。
+
 ## 2018.9.27日课程提示  
 上课前请配置好R和Rstudio，连接网络并安装package: readr, foreign, dplyr, Amelia, forecast.安装时有关联包的会自动加入安装序列。另外，请下载数据集Titanic作为课堂练习所用。
 
