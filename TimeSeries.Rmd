@@ -1,0 +1,179 @@
+---
+title: "TimeSeires"
+author: "徐宁"
+date: "2018/12/14"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1 加载本次课需要的工具包
+```{r}
+require(ggplot2) #require等同于library,但在library功能之前加了一个检查是否已经载入状态检查
+require(forecast)
+require(fpp2)
+require(GGally)
+```
+## 2 时间序列分析、预测和画图
+ggplot2提供了自动适应变量类型的函数autoplot()，等同于ggplot()函数,但更为智能化
+```{r}
+autoplot(elec)
+autoplot(a10)
+autoplot(h02)
+```
+
+做一个时间序列预测的案例，并感受下autoplot的使用方式
+```{r}
+# 做一个简单指数平滑法的预测案例，由于指数平滑法主要用来预测增长趋势不明显的序列，我们在案例中先从oil变量中截出一段较为平缓的数据
+oildata=window(oil,start=1996) #从oil数据集中截取1996年之后的数据
+fc=ses(oildata,h=5,alpha = 0.3) #
+autoplot(fc)
+round(accuracy(fc),2) #accuracy函数用于取出预测模型拟合和预测精度(如果有预测的话)，round指定了四舍五入位数
+```
+进一步，认识画多个数据时用到的autolayer函数，一个数据序列一个图层
+```{r}
+#除第一图层用autoplot外，之后的图层均使用autolayer()函数，并自动在右侧加图例
+autoplot(oildata)+
+  autolayer(fc,series='ses',PI=F)+    # 参数PI=FALSE关闭了预测置信区间
+  ylab('Oil(millions of tonnes)')+xlab('Year')+
+  guides(colour=guide_legend(title='series'))+
+  ggtitle('Oil production in Saudi Arabia from 1996 to 2013')
+```
+
+## 3 特征分析和序列分解
+
+```{r}
+# ggseasonplot将a10的数据按年份分段，逐段每年的发展变化，用于分析季节性特征的变化情况
+ggseasonplot(a10,year.labels = T,year.labels.left = T)+
+  ylab('million')+
+  ggtitle('Seasonal plot') 
+```
+
+```{r}
+ggseasonplot(a10,polar=T)+
+  ylab('million')+
+  ggtitle('Seasonal plot')
+```
+
+
+```{r}
+#ggsubseriesplot函数将每年对应月份的数据聚合在一起组成月度子序列
+ggsubseriesplot(a10)+
+  ylab('million')+
+  ggtitle('Seasonal subseries plot')
+```
+
+移动平均法通过至少两个周期的数据做均值取得趋势序列，这个序列平滑掉了数据的周期波动，进而使得趋势和周期能够轻松分解。单独做移动平均使用ma函数，如
+```{r}
+autoplot(elecequip,series="Data")+
+  autolayer(ma(elecequip,12),series="12-MA")
+```
+事实上如果分解趋势和季节特征直接使用decompose函数即可
+```{r}
+deseries=decompose(elecequip)  #默认按照加法模式分解序列elecquip，分解结果放入deseries中
+autoplot(deseries) #用自适应画图函数观察分解结果
+```
+
+## 3 序列相关性分析
+```{r}
+# 序列往往能够通过相关性找出与它关系密切的其他事物间的关系，例如用电需求显然与气温是有明显关系，观察下图中用电量Demand和气温Temperature的关系，这两个变量放在时间序列数据框elecdemand中
+autoplot(elecdemand[,c('Demand','Temperature')],facets=T)+
+  xlab('Year:2014')+ylab('')+
+  ggtitle('Half-hourly electricity demand: Victoria, Australia')
+```
+做出用电需求量和气温的散点图，从两者之间的变化趋势分析两个序列的相关性程度
+```{r}
+qplot(Temperature,Demand,data=as.data.frame(elecdemand))+
+  ylab('Demand(GW)')+xlab('Temperature(Celsius)')
+```
+
+```{r}
+# 为了利用visnights数据集的前5个变量做相关性检验，先来观察下这5个变量的情况
+autoplot(visnights[,1:5],facets = T)+  
+  ylab('Number of visitor nights each quarter(millions)') 
+```
+
+```{r}
+ggpairs(as.data.frame(visnights[,1:5]))  #做visnights前5个变量的序列间相关性检验图
+```
+
+滞后序列的相关性
+```{r}
+beer2=window(ausbeer,start=1992)
+beer2
+```
+
+```{r}
+gglagplot(beer2) #做序列beer2的滞后散点图，lag1即自身与滞后1期的滞后序列做图
+```
+
+```{r}
+ggAcf(beer2)
+```
+
+```{r}
+y=ts(rnorm(50))  #生成50个正态随机数，并做成ts格式，默认均值为0标准差为1
+autoplot(y)+ggtitle('White noise')  #用autoplot观察序列y的图形
+ggAcf(y)  # 做出y的滞后自相关图，即ACF图
+```
+
+```{r}
+fcses=ses(beer2,15)  #用指数平滑法训练出模型fcses
+ggAcf(residuals(fcses))  # 检查模型fcses残差的ACF图
+fcarima=auto.arima(beer2)  # 利用自动定参数的ARIMA模型训练模型fcarima
+ggAcf(residuals(fcarima))  # 检查模型fcarima的残差ACF图
+```
+
+```{r}
+checkresiduals(fcses)
+checkresiduals(fcarima)
+```
+
+## 4 简单预测方法
+
+```{r}
+meanf(beer2,10) #以均值作为未来10期数据的预测
+naive(beer2,10)  #以最末期数据作为未来10期预测
+rwf(beer2,10)   # naive预测又成为 random walf forecast，rwf与naive相同效果
+snaive(beer2,10) # 带季节性特征的naive预测
+rwf(beer2,10,drift=T)  #带趋势漂移的季节性特征naive预测
+
+```
+时间项+周期变量回归法预测 
+```{r}
+fit=tslm(beer2~trend+season)
+autoplot(beer2,series='Data')+
+  autolayer(fit$fitted.values,series="Fitted")
+```
+
+指数平滑法
+```{r}
+oildata=window(oil,start=1996)
+fc=ses(oildata,h=5,alpha = 0.3)
+autoplot(fc)
+```
+Holt's方法
+```{r}
+air=window(ausair,start=1990)
+fc=holt(air,h=5)
+fc1=holt(air,h=15)
+fc2=holt(air,damped = T,phi=0.9,h=15)
+autoplot(fc1,series="Holt's method",PI=F)+
+  autolayer(fc2,series="Damped Holt's method",PI=F)
+```
+Holt-Winter季节模型
+```{r}
+fit1=hw(austourists,seasonal = "additive")
+fit2=hw(austourists,seasonal = "multiplicative")
+autoplot(austourists)+
+  autolayer(fit1,series="H-W additive forecast",PI=F)+
+  autolayer(fit2,series="H-W multipicative forecast",PI=F)
+```
+
+
+
