@@ -66,7 +66,7 @@ ggplot(data=Titanic,aes(Sex,fill=Survived))+
 如果将船舱换做船票价格会有什么结果
 ```{r}
 ggplot(data=Titanic)+
-  geom_histogram(aes(x=Fare,fill=Survived))+
+  geom_histogram(aes(x=Fare,fill=Survived),binwidth  = 40)+
   facet_grid(.~Pclass)+
   theme_light()
 ```
