@@ -223,6 +223,7 @@ lapply(iris[,-5],f)
 
 ### practice 2
 请自行加载数据，然后再运行以下代码
+该代码是作者Hadley Wickham的教学案例，参考http://courses.had.co.nz/09-user/
 ```{r}
 library(plyr)
 maxname=ddply(bnames,c("year","sex"),summarise,tot=max(percent))
