@@ -81,7 +81,7 @@ autoplot(elecequip,series="Data")+
 ```
 事实上如果分解趋势和季节特征直接使用decompose函数即可
 ```{r}
-deseries=decompose(elecequip)  #默认按照加法模式分解序列elecquip，分解结果放入deseries中
+deseries=decompose(a10)  #默认按照加法模式分解序列elecquip，分解结果放入deseries中
 autoplot(deseries) #用自适应画图函数观察分解结果
 ```
 
